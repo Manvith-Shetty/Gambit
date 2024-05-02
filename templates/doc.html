@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess API Documentation</title>
+    <link href="{{ url_for('static', path='/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <h1>Chess API Documentation</h1>
+    <p>This API provides functionalities for analyzing and understanding chess games.</p>
+    <hr>
+    <h2>Endpoints</h2>
+    <ul>
+        <li><a href="#fen-to-board">FEN to Board Representation</a></li>
+        <li><a href="#validate-move">Validate Move</a></li>
+        <li><a href="#game-from-pgn">Parse Game from PGN</a></li>
+    </ul>
+    <hr>
+    <h3 id="fen-to-board">FEN to Board Representation</h3>
+    <p>This endpoint converts a Forsyth-Edwards Notation (FEN) string to a board representation.</p>
+    <dl>
+        <dt>Request:</dt>
+        <dd>
+            <p>Method: POST</p>
+            <p>URL: /fen-to-board</p>
+            <p>**Body:** (JSON format)</p>
+            <pre>{
+  "fen": "{FEN_STRING}",
+}</pre>
+            <p>**Parameters:**</p>
+            <ul>
+                <li>{FEN_STRING}: The FEN string representing the chess position.</li>
+            </ul>
+        </dd>
+        <dt>Response:</dt>
+        <dd>
+            <p>The API returns a JSON object representing the board as 2D List.</p>
+            <p>The structure of the object depends on the chosen chess library, but it could include properties for squares (e.g., "a8": "R", "e4": "N") or a visual representation of the board.</p>
+            <pre>{
+  "board": [[Piece in each square in rank 8], [Piece in each square in rank 7], ......, [Piece in each square in rank 1]]
+}</pre>
+            <p>If there is an error i.e. FEN representation is wrong</p>
+            <pre>{
+  "error": "Invalid FEN string"
+}</pre>
+        </dd>
+    </dl>
+    <hr>
+    <h3 id="validate-move">Validate Move</h3>
+    <p>This endpoint checks if a given move is legal from the current position.</p>
+    <dl>
+        <dt>Request:</dt>
+        <dd>
+            <p>Method: POST</p>
+            <p>URL: /validate-move</p>
+            <p>**Body:** (JSON format)</p>
+            <pre>{
+  "fen": "{FEN_STRING}",
+  "move": "{SQUARE}"
+}</pre>
+            <p>**Parameters:**</p>
+            <ul>
+                <li>{FEN_STRING}: The FEN string representing the chess position.</li>
+                <li>{SQUARE}: The SQUARE represents the intial and final position of piece (e.g., "e2e4").</li>
+            </ul>
+        </dd>
+        <dt>Response:</dt>
+        <dd>
+            <p>The API returns a JSON object with a boolean `valid` property indicating if the move is legal</p>
+            <pre>{
+  "valid": true // or false
+}</pre>
+            <p>If there is an error i.e. FEN representation is wrong or move is not valid</p>
+            <pre>{
+  "error": "Invalid FEN string or move notation"
+}</pre>
+        </dd>
+    </dl>
+    <hr>
+    <h3 id="game-from-pgn">Parse Game from PGN</h3>
+    <p>This endpoint parses a Portable Game Notation (PGN) string and returns information about the game.</p>
+    <dl>
+        <dt>Request:</dt>
+        <dd>
+            <p>Method: POST</p>
+            <p>URL: /game-from-pgn</p>
+            <p>**Body:** (text format)</p>
+            <p>{PGN_STRING}: The PGN string representing the chess game.</p>
+        </dd>
+        <dt>Response:</dt>
+        <dd>
+            <p>The API returns a JSON object containing details about the game, such as:</p>
+            <ul>
+                <li>Final board position (

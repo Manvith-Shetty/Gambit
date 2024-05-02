@@ -1,13 +1,24 @@
 import chess
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from chess import Board
+import chess.pgn
+import chess.svg
 
 app = FastAPI()
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+templates = Jinja2Templates(directory="templates")
+
 
 @app.get("/")
-def read_root():
-    return {"message": "Robert James Fisher is the Greatest of All Time"}
+async def documentation(request: Request):
+    return templates.TemplateResponse(
+        request=request, name="doc.html"
+    )
 
 
 @app.post("/fen-to-board")
@@ -51,3 +62,23 @@ async def validate_move(fen: str, move: str):
         return {"valid": is_valid}
     except ValueError:
         return {"valid": False, "error": "Invalid FEN string or move notation"}
+
+
+@app.get("/pgn-to-board")
+async def pgn_to_board():
+    """
+        Analyzes a Chess game in Portable Game Notation (PGN) format and returns final position along with outcome.
+        Returns:
+            dict: A dictionary containing the board representation as a 2D list of the game along with the result.
+        """
+    try:
+
+        pgn = open("./data/pgn/fisher.pgn")
+        game = chess.pgn.read_game(pgn)
+        board = game.board()
+        for move in game.mainline_moves():
+            board.push(move)
+        fen = board.fen()
+        return {await fen_to_board(fen), game.headers["Result"]}
+    except ValueError:
+        return {"error": "Invalid pgn"}
